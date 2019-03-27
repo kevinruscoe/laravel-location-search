@@ -23,7 +23,12 @@ Route::get('/', function () {
 
     foreach ($users as $user) {
         foreach ($user->addresses as $address) {
-            printf("%s<br>\n", $address->geoResults->distance);
+            printf(
+                "User Id: %s, Address Id: %s, Distance: %s<br>\n", 
+                $user->id,
+                $address->id,
+                $address->geoResults->distance
+            );
         }
     }
 });
