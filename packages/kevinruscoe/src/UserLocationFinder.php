@@ -8,13 +8,38 @@ use App\Address;
 
 class UserLocationFinder
 {
+    /**
+     * The Distance.
+     * 
+     * @var int
+     */
     protected $distance = 0;
 
+    /**
+     * The Latitude.
+     * 
+     * @var float
+     */
     protected $latitude = 0;
 
+    /**
+     * The Longitude.
+     * 
+     * @var float
+     */
     protected $longitude = 0;
 
-    public function __construct($latitude = 0, $longitude = 0, $distance = 0) {
+    /**
+     * The constructor.
+     * 
+     * @param float $latitude
+     * @param float $longitude
+     * @param float $distance
+     * 
+     * @return UserLocationFinder
+     */
+    public function __construct($latitude = 0, $longitude = 0, $distance = 0)
+    {
         $this->distance = $distance;
 
         $this->latitude = $latitude;
@@ -24,6 +49,11 @@ class UserLocationFinder
         return $this;
     }
 
+    /**
+     * Fetches users and their locations within the distance.
+     * 
+     * @return Collection
+     */
     public function fetch()
     {        
         $from = [
@@ -32,7 +62,15 @@ class UserLocationFinder
         ];
 
         $results = DB::select(
-            "select users.id as user_id, addresses.id as address_id, st_distance_sphere(POINT(?, ?), addresses.location) / 1609.344 as distance from addresses inner join users on addresses.user_id = users.id having distance < ? order by distance asc",
+            "select ".
+                "users.id as user_id, ".
+                "addresses.id as address_id, ".
+                "st_distance_sphere(".
+                    "POINT(?, ?), addresses.location".
+                ") / 1609.344 as distance ".
+            "from addresses ".
+            "inner join users on addresses.user_id = users.id ".
+            "having distance < ?",
             [
                 $this->latitude,
                 $this->longitude,
