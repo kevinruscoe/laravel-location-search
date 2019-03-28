@@ -1,5 +1,8 @@
 <?php
 
+use KevinRuscoe\GeoHelpers\Point;
+use KevinRuscoe\GeoHelpers\MilesMetresCalculator;
+
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -14,34 +17,24 @@
 
 
 Route::get('/', function () {
+    $users = App\User::withinMetresOf(
+        MilesMetresCalculator::milesToMetres(100),
+        new Point(52, 0.2)
+    )->get();
 
-    $executionStartTime = microtime(true);
-
-    $distance = 100;
-    $lat = 52;
-    $lng = 0.2;
-
-    $users = App\User::orderedDistanceFrom($distance, $lat, $lng)->get();
-
-    // Order users by their first addresses' distance
+    // Order users by their first addresses' metres
     $users = $users->sortBy(function($user) {
-        return $user->addresses[0]->distance;
+        return $user->addresses[0]->metres;
     });
 
     foreach ($users as $user) {
         foreach ($user->addresses as $address) {
             printf(
-                "User Id: %s, Address Id: %s, Distance: %s<br>\n", 
+                "User Id: %s, Address Id: %s, Miles: %s<br>\n", 
                 $user->id,
                 $address->id,
-                $address->distance
+                MilesMetresCalculator::metresToMiles($address->metres)
             );
         }
     }
-
-    $executionEndTime = microtime(true);
-
-    $seconds = $executionEndTime - $executionStartTime;
-
-    echo "This script took $seconds to execute.";
 });

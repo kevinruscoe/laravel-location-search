@@ -5,6 +5,7 @@ namespace App;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Database\Eloquent\Builder;
+use KevinRuscoe\GeoHelpers\Point;
 
 class User extends Authenticatable
 {
@@ -48,24 +49,27 @@ class User extends Authenticatable
      * 
      * @param Illuminate\Database\Eloquent\Builder $builder
      * @param float $distance
-     * @param float $lat
-     * @param float $lng
+     * @param Point $point
+     * @throws \Expection
      * 
      * @return Illuminate\Database\Eloquent\Builder $builder
      */
-    public function scopeOrderedDistanceFrom(
+    public function scopeWithinMetresOf(
         Builder $builder, 
-        float $distance = 0,
-        float $lat = 0,
-        float $lng = 0
+        float $metres = 0,
+        Point $point = null
     ) {
+        if (is_null($point)) {
+            throw new \Exception('$point must be a Point object.');
+        }
+        
         return $builder->with([
-            'addresses' => function($builder) use ($distance, $lat, $lng) {
-                $builder->distanceFrom($distance, $lat, $lng)
-                    ->orderBy('distance');
+            'addresses' => function($builder) use ($metres, $point) {
+                $builder->withinMetresOf($metres, $point)
+                    ->orderBy('metres');
             }
-        ])->whereHas('addresses', function($builder) use ($distance, $lat, $lng) {
-            $builder->distanceFrom($distance, $lat, $lng);
+        ])->whereHas('addresses', function($builder) use ($metres, $point) {
+            $builder->withinMetresOf($metres, $point);
         });
     }
 }
