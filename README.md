@@ -1,4 +1,4 @@
-```
+```php
 $users = App\User::withinMetresOf(
     MilesMetresCalculator::milesToMetres(100),
     new Point(52, 0.2)
